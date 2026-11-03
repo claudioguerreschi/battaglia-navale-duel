@@ -1120,14 +1120,21 @@ function renderAll() {
     setupPanel.style.display = 'none';
     if (battleBottomBar) battleBottomBar.style.display = 'flex';
     boardsContainer.classList.remove('single-setup-mode');
-    cardEnemy.style.display = 'flex';
-    cardMy.style.display = 'flex';
     mobileTabs.classList.add('visible-mobile');
 
+    const isMobileViewport = window.innerWidth <= 800;
     const tabEnemyBtn = document.getElementById('tab-enemy-radar');
     const tabMyBtn = document.getElementById('tab-my-fleet');
     tabEnemyBtn.classList.toggle('active', app.mobileActiveTab === 'enemy');
     tabMyBtn.classList.toggle('active', app.mobileActiveTab === 'my');
+
+    if (isMobileViewport) {
+      cardEnemy.style.display = app.mobileActiveTab === 'enemy' ? 'flex' : 'none';
+      cardMy.style.display = app.mobileActiveTab === 'my' ? 'flex' : 'none';
+    } else {
+      cardEnemy.style.display = 'flex';
+      cardMy.style.display = 'flex';
+    }
 
     cardEnemy.classList.toggle('hidden-on-mobile', app.mobileActiveTab !== 'enemy');
     cardMy.classList.toggle('hidden-on-mobile', app.mobileActiveTab !== 'my');
