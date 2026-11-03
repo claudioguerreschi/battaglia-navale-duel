@@ -1,5 +1,5 @@
 // ============================================================================
-// BATTAGLIA NAVALE DUEL (v2.0) - NAVI SVG REALI, DRAG & DROP E MULTIPLAYER
+// BATTAGLIA NAVALE DUEL (v4.0) - ESPLOSIONI ANIMATE, VISTA DIFESA & DRAG-DROP
 // ============================================================================
 
 const PEER_PREFIX = 'navalduel10-room-';
@@ -14,118 +14,83 @@ const FLEET_TEMPLATE = [
   { id: 'destroyer', name: 'Cacciatorpediniere', size: 2 }
 ];
 
-// --- Grafica SVG Top-Down per le 5 Navi da Guerra ---
+// --- Grafica SVG Top-Down ad Alto Contrasto per le 5 Navi da Guerra ---
 function getShipInnerArtwork(shipId) {
   switch (shipId) {
     case 'carrier': // 500 x 100
       return `
-        <defs>
-          <linearGradient id="hull_carrier" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#64748b"/>
-            <stop offset="50%" stop-color="#334155"/>
-            <stop offset="100%" stop-color="#1e293b"/>
-          </linearGradient>
-        </defs>
         <!-- Scafo e Ponte di Volo angolato -->
-        <polygon points="14,18 445,12 490,36 490,64 445,88 14,82 6,50" fill="url(#hull_carrier)" stroke="#94a3b8" stroke-width="4" stroke-linejoin="round"/>
+        <polygon points="12,16 446,10 492,35 492,65 446,90 12,84 4,50" fill="#475569" stroke="#e2e8f0" stroke-width="5" stroke-linejoin="round"/>
         <!-- Pista di decollo -->
-        <polygon points="24,26 435,22 474,42 474,58 435,76 24,72" fill="#1e293b" stroke="#475569" stroke-width="2"/>
-        <line x1="35" y1="49" x2="460" y2="49" stroke="#facc15" stroke-width="3" stroke-dasharray="18 12"/>
-        <line x1="40" y1="34" x2="420" y2="30" stroke="#e2e8f0" stroke-width="1.5" stroke-opacity="0.6"/>
-        <line x1="40" y1="64" x2="420" y2="68" stroke="#e2e8f0" stroke-width="1.5" stroke-opacity="0.6"/>
+        <polygon points="24,24 436,20 476,41 476,59 436,78 24,74" fill="#1e293b" stroke="#94a3b8" stroke-width="2.5"/>
+        <line x1="35" y1="49" x2="460" y2="49" stroke="#facc15" stroke-width="4" stroke-dasharray="20 12"/>
+        <line x1="40" y1="33" x2="420" y2="29" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.75"/>
+        <line x1="40" y1="65" x2="420" y2="69" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.75"/>
         <!-- Torre di Comando (Isola) -->
-        <rect x="150" y="10" width="85" height="20" rx="5" fill="#475569" stroke="#cbd5e1" stroke-width="2.5"/>
-        <rect x="172" y="14" width="36" height="12" rx="3" fill="#0f172a"/>
-        <circle cx="220" cy="20" r="5" fill="#38bdf8"/>
+        <rect x="148" y="8" width="88" height="22" rx="5" fill="#64748b" stroke="#f8fafc" stroke-width="3"/>
+        <rect x="170" y="13" width="38" height="12" rx="3" fill="#0f172a"/>
+        <circle cx="222" cy="19" r="5.5" fill="#38bdf8"/>
         <!-- Caccia sul ponte -->
-        <polygon points="110,52 88,40 93,52 88,64" fill="#cbd5e1"/>
-        <polygon points="310,50 288,38 293,50 288,62" fill="#cbd5e1"/>
+        <polygon points="112,52 86,38 92,52 86,66" fill="#f8fafc"/>
+        <polygon points="312,50 286,36 292,50 286,64" fill="#f8fafc"/>
       `;
 
     case 'battleship': // 400 x 100
       return `
-        <defs>
-          <linearGradient id="hull_bs" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#94a3b8"/>
-            <stop offset="50%" stop-color="#475569"/>
-            <stop offset="100%" stop-color="#1e293b"/>
-          </linearGradient>
-        </defs>
         <!-- Scafo Corazzato -->
-        <path d="M 18,22 L 295,16 Q 365,20 392,50 Q 365,80 295,84 L 18,78 Q 6,50 18,22 Z" fill="url(#hull_bs)" stroke="#cbd5e1" stroke-width="4"/>
-        <path d="M 32,30 L 285,26 Q 345,30 370,50 Q 345,70 285,74 L 32,70 Z" fill="#334155" stroke="#64748b" stroke-width="2"/>
+        <path d="M 16,20 L 296,14 Q 368,18 394,50 Q 368,82 296,86 L 16,80 Q 4,50 16,20 Z" fill="#64748b" stroke="#f8fafc" stroke-width="5"/>
+        <path d="M 30,29 L 286,25 Q 346,29 372,50 Q 346,71 286,75 L 30,71 Z" fill="#334155" stroke="#94a3b8" stroke-width="2.5"/>
         <!-- Sovrastruttura centrale -->
-        <rect x="135" y="28" width="115" height="44" rx="10" fill="#475569" stroke="#94a3b8" stroke-width="2.5"/>
-        <rect x="160" y="35" width="60" height="30" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+        <rect x="132" y="26" width="118" height="48" rx="10" fill="#475569" stroke="#e2e8f0" stroke-width="3"/>
+        <rect x="158" y="34" width="64" height="32" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
         <!-- Torretta Tripla Prua -->
-        <circle cx="295" cy="50" r="18" fill="#64748b" stroke="#e2e8f0" stroke-width="2.5"/>
-        <line x1="305" y1="43" x2="348" y2="43" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
-        <line x1="308" y1="50" x2="352" y2="50" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
-        <line x1="305" y1="57" x2="348" y2="57" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="296" cy="50" r="19" fill="#475569" stroke="#f8fafc" stroke-width="3"/>
+        <line x1="306" y1="42" x2="352" y2="42" stroke="#f8fafc" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="310" y1="50" x2="356" y2="50" stroke="#f8fafc" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="306" y1="58" x2="352" y2="58" stroke="#f8fafc" stroke-width="4.5" stroke-linecap="round"/>
         <!-- Torretta Tripla Poppa -->
-        <circle cx="75" cy="50" r="18" fill="#64748b" stroke="#e2e8f0" stroke-width="2.5"/>
-        <line x1="65" y1="43" x2="25" y2="43" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
-        <line x1="62" y1="50" x2="22" y2="50" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
-        <line x1="65" y1="57" x2="25" y2="57" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="76" cy="50" r="19" fill="#475569" stroke="#f8fafc" stroke-width="3"/>
+        <line x1="66" y1="42" x2="22" y2="42" stroke="#f8fafc" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="62" y1="50" x2="18" y2="50" stroke="#f8fafc" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="66" y1="58" x2="22" y2="58" stroke="#f8fafc" stroke-width="4.5" stroke-linecap="round"/>
       `;
 
     case 'cruiser': // 300 x 100
       return `
-        <defs>
-          <linearGradient id="hull_cr" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#64748b"/>
-            <stop offset="50%" stop-color="#334155"/>
-            <stop offset="100%" stop-color="#0f172a"/>
-          </linearGradient>
-        </defs>
-        <path d="M 16,24 L 210,18 Q 268,24 292,50 Q 268,76 210,82 L 16,76 Z" fill="url(#hull_cr)" stroke="#94a3b8" stroke-width="4"/>
+        <path d="M 14,22 L 212,16 Q 270,22 294,50 Q 270,78 212,84 L 14,78 Z" fill="#475569" stroke="#f8fafc" stroke-width="5"/>
         <!-- Eliporto a poppa -->
-        <rect x="26" y="31" width="46" height="38" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
-        <circle cx="49" cy="50" r="13" fill="none" stroke="#facc15" stroke-width="2" stroke-dasharray="6 4"/>
+        <rect x="24" y="29" width="48" height="42" rx="5" fill="#1e293b" stroke="#94a3b8" stroke-width="2.5"/>
+        <circle cx="48" cy="50" r="14" fill="none" stroke="#facc15" stroke-width="2.5" stroke-dasharray="6 4"/>
         <!-- Plancia e Radar -->
-        <rect x="92" y="28" width="90" height="44" rx="8" fill="#475569" stroke="#cbd5e1" stroke-width="2"/>
-        <circle cx="137" cy="50" r="11" fill="#0ea5e9" stroke="#e0f2fe" stroke-width="2"/>
+        <rect x="90" y="26" width="92" height="48" rx="8" fill="#64748b" stroke="#f8fafc" stroke-width="2.5"/>
+        <circle cx="136" cy="50" r="12" fill="#0ea5e9" stroke="#ffffff" stroke-width="2.5"/>
         <!-- Cannone di prua -->
-        <circle cx="222" cy="50" r="14" fill="#64748b" stroke="#e2e8f0" stroke-width="2"/>
-        <line x1="232" y1="50" x2="268" y2="50" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="222" cy="50" r="15" fill="#475569" stroke="#f8fafc" stroke-width="2.5"/>
+        <line x1="232" y1="50" x2="270" y2="50" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
       `;
 
     case 'submarine': // 300 x 100
       return `
-        <defs>
-          <linearGradient id="hull_sub" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#475569"/>
-            <stop offset="50%" stop-color="#1e293b"/>
-            <stop offset="100%" stop-color="#090d16"/>
-          </linearGradient>
-        </defs>
         <!-- Timoni di poppa -->
-        <polygon points="8,20 34,36 34,64 8,80" fill="#334155" stroke="#94a3b8" stroke-width="2.5"/>
+        <polygon points="6,18 36,35 36,65 6,82" fill="#475569" stroke="#cbd5e1" stroke-width="3"/>
         <!-- Scafo sigariforme -->
-        <rect x="20" y="24" width="268" height="52" rx="26" fill="url(#hull_sub)" stroke="#38bdf8" stroke-width="3.5"/>
+        <rect x="18" y="22" width="272" height="56" rx="28" fill="#1e293b" stroke="#38bdf8" stroke-width="4.5"/>
         <!-- Falsatorre (Vela) con timoni di prua -->
-        <rect x="135" y="14" width="44" height="72" rx="6" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-        <rect x="115" y="34" width="84" height="32" rx="16" fill="#334155" stroke="#cbd5e1" stroke-width="2.5"/>
-        <circle cx="165" cy="50" r="6" fill="#38bdf8"/>
+        <rect x="134" y="12" width="46" height="76" rx="7" fill="#64748b" stroke="#f8fafc" stroke-width="2.5"/>
+        <rect x="112" y="32" width="88" height="36" rx="18" fill="#475569" stroke="#f8fafc" stroke-width="3"/>
+        <circle cx="166" cy="50" r="7" fill="#38bdf8"/>
         <!-- Cupola Sonar a prua -->
-        <path d="M 262,31 Q 284,50 262,69" fill="none" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.8"/>
+        <path d="M 260,29 Q 286,50 260,71" fill="none" stroke="#7dd3fc" stroke-width="4"/>
       `;
 
     case 'destroyer': // 200 x 100
     default:
       return `
-        <defs>
-          <linearGradient id="hull_dd" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#94a3b8"/>
-            <stop offset="50%" stop-color="#475569"/>
-            <stop offset="100%" stop-color="#1e293b"/>
-          </linearGradient>
-        </defs>
-        <path d="M 14,24 L 128,18 Q 174,25 192,50 Q 174,75 128,82 L 14,76 Z" fill="url(#hull_dd)" stroke="#cbd5e1" stroke-width="4"/>
-        <rect x="40" y="30" width="68" height="40" rx="7" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
-        <circle cx="74" cy="50" r="9" fill="#38bdf8"/>
-        <circle cx="136" cy="50" r="13" fill="#64748b" stroke="#e2e8f0" stroke-width="2"/>
-        <line x1="145" y1="50" x2="178" y2="50" stroke="#e2e8f0" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M 12,22 L 130,16 Q 176,24 194,50 Q 176,76 130,84 L 12,78 Z" fill="#64748b" stroke="#f8fafc" stroke-width="5"/>
+        <rect x="38" y="28" width="70" height="44" rx="8" fill="#334155" stroke="#e2e8f0" stroke-width="2.5"/>
+        <circle cx="73" cy="50" r="10" fill="#38bdf8"/>
+        <circle cx="136" cy="50" r="14" fill="#475569" stroke="#f8fafc" stroke-width="2.5"/>
+        <line x1="145" y1="50" x2="180" y2="50" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
       `;
   }
 }
@@ -142,6 +107,37 @@ function renderShipSVG(shipId, size, horizontal = true) {
       <g transform="translate(${h}, 0) rotate(90)">${artwork}</g>
     </svg>`;
   }
+}
+
+// --- Marker SVG Animati per Esplosioni (Fiamme + Fumo + Onda d'urto) e Acqua ---
+function renderExplosionMarkerHTML(isSunk = false) {
+  const outerColor = isSunk ? '#dc2626' : '#f97316';
+  const midColor = isSunk ? '#f97316' : '#fbbf24';
+  return `
+    <div class="explosion-anim-wrap">
+      <div class="explosion-shockwave"></div>
+      <svg class="explosion-svg" viewBox="0 0 100 100">
+        <!-- Nuvole di fumo che salgono -->
+        <circle class="smoke-puff-1" cx="36" cy="30" r="14" fill="rgba(15, 23, 42, 0.78)" />
+        <circle class="smoke-puff-2" cx="64" cy="26" r="12" fill="rgba(30, 41, 59, 0.75)" />
+        <!-- Cratere / Raggi d'esplosione -->
+        <polygon class="flame-outer" points="50,6 63,30 88,18 76,44 96,58 72,68 80,90 54,78 36,94 36,70 10,72 26,50 8,30 35,34" fill="${outerColor}" stroke="#fef08a" stroke-width="2.5" stroke-linejoin="round" />
+        <!-- Fiamma viva centrale che danza -->
+        <path class="flame-inner" d="M 50,18 C 64,36 78,48 72,68 C 68,82 58,88 50,88 C 42,88 32,82 28,68 C 22,48 36,36 50,18 Z" fill="${midColor}" />
+        <!-- Nucleo incandescente bianco/giallo -->
+        <circle cx="50" cy="64" r="14" fill="#fef9c3" />
+      </svg>
+    </div>
+  `;
+}
+
+function renderSplashMarkerHTML() {
+  return `
+    <div class="splash-anim-wrap">
+      <div class="splash-ring"></div>
+      <div class="splash-core"></div>
+    </div>
+  `;
 }
 
 // --- Effetti Sonori Sintetizzati & Vibrazione Mobile ---
@@ -202,16 +198,16 @@ class NavalSoundFX {
   }
 
   torpedoHit() {
-    this.vibrate([45, 30, 65]);
-    this.playTone(150, 'sawtooth', 0.2, 0.22, 0);
-    this.playTone(110, 'square', 0.26, 0.18, 0.06);
+    this.vibrate([55, 30, 85]);
+    this.playTone(150, 'sawtooth', 0.22, 0.24, 0);
+    this.playTone(95, 'square', 0.3, 0.2, 0.06);
   }
 
   shipSunk() {
-    this.vibrate([70, 40, 90, 40, 120]);
-    this.playTone(140, 'sawtooth', 0.22, 0.24, 0);
-    this.playTone(95, 'sawtooth', 0.32, 0.24, 0.12);
-    this.playTone(520, 'triangle', 0.25, 0.18, 0.26);
+    this.vibrate([80, 40, 100, 40, 140]);
+    this.playTone(140, 'sawtooth', 0.24, 0.25, 0);
+    this.playTone(90, 'sawtooth', 0.36, 0.25, 0.12);
+    this.playTone(520, 'triangle', 0.26, 0.18, 0.28);
   }
 
   battleStart() {
@@ -242,6 +238,7 @@ const app = {
   bc: null,
   cloudSse: null,
   retryInterval: null,
+  turnSwitchTimer: null,
   seenMessages: new Set(),
 
   // Controlli posizionamento e Drag & Drop durante SETUP
@@ -249,6 +246,7 @@ const app = {
   placeHorizontal: true,
   dragState: null,
   mobileActiveTab: 'enemy', // 'enemy' | 'my'
+  lastSeenTotalShots: 0,
 
   state: null
 };
@@ -269,7 +267,10 @@ function createInitialGameState(p1Name = 'Comandante 1', p2Name = 'Comandante 2'
   return {
     players: [createPlayerObject(p1Name), createPlayerObject(p2Name)],
     phase: 'SETUP', // 'SETUP' | 'BATTLE' | 'GAME_OVER'
+    subPhase: 'AIMING', // 'AIMING' | 'PASSING_TURN'
     turn: 0,
+    lastShotResult: null, // 'miss' | 'hit' | 'sunk'
+    lastShotDefender: null,
     lastActionText: 'Trascina le tue 5 navi sulla mappa (tocca una nave per ruotarla)!',
     winner: null
   };
@@ -373,13 +374,11 @@ function tryRotateShipSmart(player, shipId) {
   const newHoriz = !ship.horizontal;
   const headCell = ship.cells[0];
 
-  // 1. Prova a ruotare mantenendo la prua/testa della nave
   if (tryPlaceShipAt(player, shipId, headCell, newHoriz)) {
     app.placeHorizontal = newHoriz;
     return true;
   }
 
-  // 2. Se tocca un'altra nave ruotando sul posto, prova i piccoli spostamenti adiacenti
   const baseR = Math.floor(headCell / 10);
   const baseC = headCell % 10;
   const offsets = [
@@ -448,7 +447,6 @@ function handleGlobalPointerMove(e) {
 
   const stageEl = document.getElementById('stage-my');
   const rect = stageEl.getBoundingClientRect();
-  // Su touch mobile applica un leggero offset verticale così il dito non copre la nave
   const touchOffsetY = e.pointerType === 'touch' ? -14 : 0;
   const relX = e.clientX - rect.left;
   const relY = e.clientY + touchOffsetY - rect.top;
@@ -480,14 +478,12 @@ function handleGlobalPointerMove(e) {
   ds.lastCandidateStart = startCellIdx;
   ds.lastValid = isValid;
 
-  // Muovi la sagoma SVG della nave in tempo reale mentre trascini
   const shipDom = document.querySelector(`#ships-layer-my [data-ship-id="${ds.shipId}"]`);
   if (shipDom) {
     shipDom.style.left = `${clampedCol * 10}%`;
     shipDom.style.top = `${clampedRow * 10}%`;
   }
 
-  // Evidenzia le caselle sotto la nave (Verde = Valido, Rosso = Collisione)
   const allCells = document.querySelectorAll('#grid-my .naval-cell');
   allCells.forEach((cEl, idx) => {
     cEl.classList.remove('drag-preview-valid', 'drag-preview-invalid');
@@ -506,7 +502,6 @@ function handleGlobalPointerUp() {
   if (!me) return;
 
   if (!ds.movedEnough) {
-    // Era un singolo tocco/clic sulla nave -> Ruotala di 90° sul posto!
     const rotated = tryRotateShipSmart(me, ds.shipId);
     if (rotated) {
       sfx.sonarPing();
@@ -564,6 +559,23 @@ function sendNetMessage(type, payload = {}) {
   }
 }
 
+function getTotalShotsCount(st) {
+  if (!st || !st.players) return 0;
+  return st.players[0].shotsFired + st.players[1].shotsFired;
+}
+
+function triggerBoardImpactEffect(defenderIdx, shotResult) {
+  const stageId = defenderIdx === app.myIndex ? 'stage-my' : 'stage-enemy';
+  const stageEl = document.getElementById(stageId);
+  if (!stageEl) return;
+
+  if (shotResult === 'hit' || shotResult === 'sunk') {
+    stageEl.classList.remove('board-impact-shake');
+    void stageEl.offsetWidth; // Reflow per riavviare l'animazione
+    stageEl.classList.add('board-impact-shake');
+  }
+}
+
 function handleIncomingNetMessage(msg) {
   if (!msg || !msg.msgId || msg.roomCode !== app.roomCode) return;
   if (app.seenMessages.has(msg.msgId)) return;
@@ -587,6 +599,7 @@ function handleIncomingNetMessage(msg) {
     }
   } else if (type === 'STATE_SYNC') {
     const prevPhase = app.state ? app.state.phase : null;
+    const prevShots = getTotalShotsCount(app.state);
     const myLocalShips = app.state ? app.state.players[app.myIndex].ships : null;
     const myLocalReady = app.state ? app.state.players[app.myIndex].ready : false;
 
@@ -598,20 +611,27 @@ function handleIncomingNetMessage(msg) {
       app.state.players[app.myIndex].ships = myLocalShips;
     }
 
+    // Imposta SEMPRE la scheda corretta in base a chi sta attaccando o difendendo!
+    // Se è il mio turno -> vedo il Radar Nemico per sparare.
+    // Se è il turno del nemico -> vedo La Mia Flotta per guardare i suoi colpi sulle mie navi!
+    if (app.state.phase === 'BATTLE') {
+      app.mobileActiveTab = app.state.turn === app.myIndex ? 'enemy' : 'my';
+    }
+
+    const newShots = getTotalShotsCount(app.state);
     if (prevPhase === 'SETUP' && app.state.phase === 'BATTLE') {
       sfx.battleStart();
-      app.mobileActiveTab = app.state.turn === app.myIndex ? 'enemy' : 'my';
-    } else if (app.state.phase === 'BATTLE') {
-      // Cambio vista automatico fluido su mobile dopo il colpo
-      const targetTab = app.state.turn === app.myIndex ? 'enemy' : 'my';
-      if (app.mobileActiveTab !== targetTab) {
-        setTimeout(() => {
-          if (app.state && app.state.phase === 'BATTLE') {
-            app.mobileActiveTab = app.state.turn === app.myIndex ? 'enemy' : 'my';
-            renderAll();
-          }
-        }, 950);
+    } else if (newShots > prevShots) {
+      if (app.state.lastShotResult === 'sunk') {
+        sfx.shipSunk();
+      } else if (app.state.lastShotResult === 'hit') {
+        sfx.torpedoHit();
+      } else {
+        sfx.waterSplash();
       }
+      setTimeout(() => {
+        triggerBoardImpactEffect(app.state.lastShotDefender, app.state.lastShotResult);
+      }, 30);
     } else if (prevPhase !== 'GAME_OVER' && app.state.phase === 'GAME_OVER') {
       sfx.victory();
     }
@@ -805,7 +825,7 @@ function joinOnlineRoom(rawCode) {
 }
 
 // ============================================================================
-// LOGICA BATTAGLIA NAVALE (CONFERMA FLOTTA, SPARO, AFFONDAMENTO, VITTORIA)
+// LOGICA BATTAGLIA NAVALE (CONFERMA FLOTTA, SPARO CON ANIMAZIONE, VITTORIA)
 // ============================================================================
 
 function confirmMyFleetReady() {
@@ -841,8 +861,10 @@ function checkAndStartBattleIfBothReady() {
 
   if (p0.ready && p1.ready) {
     st.phase = 'BATTLE';
+    st.subPhase = 'AIMING';
     st.turn = 0;
-    st.lastActionText = `🔥 Battaglia iniziata! Tocca a ${p0.name} sparare sul Radar Nemico!`;
+    st.lastActionText = `🔥 Battaglia iniziata! Tocca a ${p0.name} sparare!`;
+    // Chi è di turno vede il Radar Nemico; chi difende vede La Propria Flotta!
     app.mobileActiveTab = app.myIndex === 0 ? 'enemy' : 'my';
     sfx.battleStart();
   } else if (p0.ready && !p1.ready) {
@@ -857,7 +879,7 @@ function checkAndStartBattleIfBothReady() {
 
 function handleEnemyGridClick(cellIndex) {
   const st = app.state;
-  if (!st || st.phase !== 'BATTLE') return;
+  if (!st || st.phase !== 'BATTLE' || st.subPhase === 'PASSING_TURN') return;
   if (st.turn !== app.myIndex) return;
 
   const enemyIdx = 1 - app.myIndex;
@@ -873,7 +895,10 @@ function handleEnemyGridClick(cellIndex) {
 
 function executeFireShot(attackerIdx, cellIndex) {
   const st = app.state;
-  if (!st || st.phase !== 'BATTLE' || st.turn !== attackerIdx) return;
+  if (!st || st.phase !== 'BATTLE' || st.subPhase === 'PASSING_TURN') return;
+  if (st.turn !== attackerIdx) return;
+
+  if (app.turnSwitchTimer) clearTimeout(app.turnSwitchTimer);
 
   const defenderIdx = 1 - attackerIdx;
   const attacker = st.players[attackerIdx];
@@ -883,9 +908,13 @@ function executeFireShot(attackerIdx, cellIndex) {
 
   attacker.shotsFired += 1;
   defender.lastShotCell = cellIndex;
+  st.lastShotDefender = defenderIdx;
 
   const coordName = `${COL_LETTERS[cellIndex % 10]}${Math.floor(cellIndex / 10) + 1}`;
   const hitShip = defender.ships.find((s) => s.cells.includes(cellIndex));
+
+  // Assicuriamoci che chi attacca veda il Radar Nemico e chi difende veda La Propria Flotta!
+  app.mobileActiveTab = attackerIdx === app.myIndex ? 'enemy' : 'my';
 
   if (hitShip) {
     attacker.hitsScored += 1;
@@ -898,6 +927,7 @@ function executeFireShot(attackerIdx, cellIndex) {
       hitShip.cells.forEach((cIdx) => {
         defender.shotsReceived[cIdx] = 'sunk';
       });
+      st.lastShotResult = 'sunk';
       sfx.shipSunk();
 
       const allSunk = defender.ships.every((s) => s.sunk);
@@ -907,33 +937,49 @@ function executeFireShot(attackerIdx, cellIndex) {
         st.lastActionText = `🏆 ${attacker.name} ha affondato l'intera flotta nemica!`;
         sfx.victory();
       } else {
-        st.lastActionText = `🔥 ${coordName}: AFFONDATA ${hitShip.name.toUpperCase()}! Spara ancora, ${attacker.name}!`;
+        st.lastActionText = `🔥 ${coordName}: AFFONDATA ${hitShip.name.toUpperCase()}! ${attacker.name} spara ancora!`;
       }
     } else {
       defender.shotsReceived[cellIndex] = 'hit';
+      st.lastShotResult = 'hit';
       sfx.torpedoHit();
-      st.lastActionText = `💥 ${coordName}: COLPITO! Hai diritto a un altro colpo, ${attacker.name}!`;
+      st.lastActionText = `💥 ${coordName}: NAVE COLPITA! ${attacker.name} ha diritto a un altro colpo!`;
+    }
+
+    renderAll();
+    triggerBoardImpactEffect(defenderIdx, st.lastShotResult);
+    broadcastState();
+
+    // Se la CPU ha colpito una tua nave, dopo 1.3s spara di nuovo mentre tu guardi la tua flotta!
+    if (app.mode === 'cpu' && st.phase === 'BATTLE' && st.turn === 1) {
+      app.turnSwitchTimer = setTimeout(cpuTakeTurn, 1350);
     }
   } else {
+    // ACQUA! Prima mostriamo per 1.4 secondi lo splash ad entrambi (il difensore lo vede sulla SUA flotta!),
+    // e solo dopo passiamo il turno e cambiamo schermata!
     defender.shotsReceived[cellIndex] = 'miss';
+    st.lastShotResult = 'miss';
+    st.subPhase = 'PASSING_TURN';
     sfx.waterSplash();
-    st.turn = defenderIdx;
-    st.lastActionText = `🌊 ${coordName}: Acqua! Il turno passa a ${defender.name}.`;
+    st.lastActionText = `🌊 ${coordName}: Acqua! Cambio turno in corso...`;
 
-    // Su mobile, dopo 950ms mostra automaticamente la scheda del giocatore che subisce/attacca
-    setTimeout(() => {
-      if (app.state && app.state.phase === 'BATTLE') {
-        app.mobileActiveTab = app.state.turn === app.myIndex ? 'enemy' : 'my';
-        renderAll();
+    renderAll();
+    broadcastState();
+
+    app.turnSwitchTimer = setTimeout(() => {
+      if (!app.state || app.state.phase !== 'BATTLE') return;
+      st.turn = defenderIdx;
+      st.subPhase = 'AIMING';
+      st.lastActionText = `⚓ Tocca a ${defender.name} attaccare!`;
+      app.mobileActiveTab = st.turn === app.myIndex ? 'enemy' : 'my';
+
+      renderAll();
+      broadcastState();
+
+      if (app.mode === 'cpu' && st.phase === 'BATTLE' && st.turn === 1) {
+        setTimeout(cpuTakeTurn, 950);
       }
-    }, 950);
-  }
-
-  renderAll();
-  broadcastState();
-
-  if (app.mode === 'cpu' && st.phase === 'BATTLE' && st.turn === 1) {
-    setTimeout(cpuTakeTurn, 850);
+    }, 1400);
   }
 }
 
@@ -981,6 +1027,7 @@ function cpuTakeTurn() {
 
 function executeRematch() {
   if (!app.state) return;
+  if (app.turnSwitchTimer) clearTimeout(app.turnSwitchTimer);
   const p1Name = app.state.players[0].name;
   const p2Name = app.state.players[1].name;
   app.state = createInitialGameState(p1Name, p2Name);
@@ -990,7 +1037,7 @@ function executeRematch() {
 }
 
 // ============================================================================
-// RENDERING INTERFACCIA GRAFICA CON NAVI SVG REALI
+// RENDERING INTERFACCIA GRAFICA CON NAVI SVG REALI & ESPLOSIONI ANIMATE
 // ============================================================================
 
 function initCoordinateHeaders() {
@@ -1034,17 +1081,19 @@ function renderAll() {
   const turnBadge = document.getElementById('turn-badge');
   const turnPrompt = document.getElementById('turn-prompt');
   const myTurn = st.phase === 'BATTLE' && st.turn === app.myIndex;
+  const enemyTurn = st.phase === 'BATTLE' && st.turn !== app.myIndex;
 
   turnHud.classList.toggle('my-turn', myTurn || (st.phase === 'SETUP' && !me.ready));
+  turnHud.classList.toggle('defending-turn', enemyTurn);
 
   if (st.phase === 'SETUP') {
     turnBadge.textContent = me.ready ? 'IN ATTESA' : 'SCHIERAMENTO';
     turnBadge.className = `turn-indicator-badge ${me.ready ? 'opponent' : ''}`;
   } else if (myTurn) {
-    turnBadge.textContent = 'TUO TURNO • SPARA!';
+    turnBadge.textContent = '🎯 TUO TURNO • ATTACCA';
     turnBadge.className = 'turn-indicator-badge';
   } else {
-    turnBadge.textContent = `TURNO DI ${enemy.name.toUpperCase()}`;
+    turnBadge.textContent = `🛡️ DIFESA • ATTACCO DI ${enemy.name.toUpperCase()}`;
     turnBadge.className = 'turn-indicator-badge opponent';
   }
 
@@ -1094,6 +1143,7 @@ function renderAll() {
   document.getElementById('enemy-ships-badge').textContent = `${enemyAlive}/5 attive`;
 
   cardEnemy.classList.toggle('active-target', myTurn);
+  cardMy.classList.toggle('defending-board', enemyTurn);
 
   renderMyBoard(me);
   if (st.phase !== 'SETUP') {
@@ -1158,10 +1208,18 @@ function renderMyBoard(me) {
 
   const isSetupEditable = app.state.phase === 'SETUP' && !me.ready;
 
-  // 1. Celle della griglia 10x10 (cliccabili anche per spostare rapidamente la nave selezionata)
+  const occupiedCells = new Set();
+  for (const ship of me.ships) {
+    for (const cIdx of ship.cells) occupiedCells.add(cIdx);
+  }
+
+  // 1. Celle della griglia 10x10 con leggero bagliore azzurro sotto le proprie navi
   for (let idx = 0; idx < 100; idx++) {
     const cell = document.createElement('div');
     cell.className = 'naval-cell';
+    if (occupiedCells.has(idx)) {
+      cell.classList.add('friendly-ship-cell');
+    }
     if (isSetupEditable) {
       cell.addEventListener('click', () => {
         const ok = tryPlaceShipAt(me, app.selectedShipId, idx, app.placeHorizontal);
@@ -1174,7 +1232,7 @@ function renderMyBoard(me) {
     gridEl.appendChild(cell);
   }
 
-  // 2. Layer Navi SVG Reali (con Drag & Drop e Tocco per Ruotare)
+  // 2. Layer Navi SVG Reali (sempre visibili sulla TUA flotta!)
   for (const ship of me.ships) {
     if (!ship.cells || ship.cells.length === 0) continue;
     const headIdx = ship.cells[0];
@@ -1186,7 +1244,11 @@ function renderMyBoard(me) {
     shipDiv.setAttribute('data-ship-id', ship.id);
     if (isSetupEditable) shipDiv.classList.add('draggable-ship');
     if (isSetupEditable && app.selectedShipId === ship.id) shipDiv.classList.add('selected-ship');
-    if (ship.sunk) shipDiv.classList.add('sunk-ship');
+    if (ship.sunk) {
+      shipDiv.classList.add('sunk-ship');
+    } else if (ship.hits && ship.hits.length > 0) {
+      shipDiv.classList.add('damaged-ship');
+    }
 
     shipDiv.style.left = `${col * 10}%`;
     shipDiv.style.top = `${row * 10}%`;
@@ -1212,7 +1274,7 @@ function renderMyBoard(me) {
     shipsLayerEl.appendChild(shipDiv);
   }
 
-  // 3. Layer Colpi Subiti (Acqua / Esplosioni sopra le navi)
+  // 3. Layer Colpi Subiti (Onde d'acqua animate / Fiamme + Fumo sopra le tue navi!)
   for (let idx = 0; idx < 100; idx++) {
     const markerCell = document.createElement('div');
     markerCell.className = 'shot-marker-cell';
@@ -1220,11 +1282,11 @@ function renderMyBoard(me) {
 
     const shotState = me.shotsReceived[idx];
     if (shotState === 'miss') {
-      markerCell.innerHTML = `<div class="marker-miss"></div>`;
+      markerCell.innerHTML = renderSplashMarkerHTML();
     } else if (shotState === 'hit') {
-      markerCell.innerHTML = `<div class="marker-hit">💥</div>`;
+      markerCell.innerHTML = renderExplosionMarkerHTML(false);
     } else if (shotState === 'sunk') {
-      markerCell.innerHTML = `<div class="marker-sunk">🔥</div>`;
+      markerCell.innerHTML = renderExplosionMarkerHTML(true);
     }
 
     shotsLayerEl.appendChild(markerCell);
@@ -1245,7 +1307,7 @@ function renderEnemyBoard(enemy, revealAll = false) {
     const cell = document.createElement('div');
     cell.className = 'naval-cell';
     const shotState = enemy.shotsReceived[idx];
-    if (app.state.phase === 'BATTLE' && shotState === null) {
+    if (app.state.phase === 'BATTLE' && app.state.subPhase !== 'PASSING_TURN' && shotState === null) {
       cell.addEventListener('click', () => handleEnemyGridClick(idx));
     }
     gridEl.appendChild(cell);
@@ -1270,7 +1332,7 @@ function renderEnemyBoard(enemy, revealAll = false) {
     shipsLayerEl.appendChild(shipDiv);
   }
 
-  // 3. Layer Colpi Sparati (Splash Acqua / Esplosioni)
+  // 3. Layer Colpi Sparati (Onde d'acqua animate / Esplosioni con Fiamme e Fumo)
   for (let idx = 0; idx < 100; idx++) {
     const markerCell = document.createElement('div');
     markerCell.className = 'shot-marker-cell';
@@ -1278,11 +1340,11 @@ function renderEnemyBoard(enemy, revealAll = false) {
 
     const shotState = enemy.shotsReceived[idx];
     if (shotState === 'miss') {
-      markerCell.innerHTML = `<div class="marker-miss"></div>`;
+      markerCell.innerHTML = renderSplashMarkerHTML();
     } else if (shotState === 'hit') {
-      markerCell.innerHTML = `<div class="marker-hit">💥</div>`;
+      markerCell.innerHTML = renderExplosionMarkerHTML(false);
     } else if (shotState === 'sunk') {
-      markerCell.innerHTML = `<div class="marker-sunk">🔥</div>`;
+      markerCell.innerHTML = renderExplosionMarkerHTML(true);
     }
 
     shotsLayerEl.appendChild(markerCell);
@@ -1293,10 +1355,12 @@ function renderFleetStatusStrip(containerId, ships) {
   const el = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = ships
-    .map(
-      (s) =>
-        `<span class="fleet-chip ${s.sunk ? 'sunk' : ''}">${s.sunk ? '💀' : '🚢'} ${s.name} (${s.size})</span>`
-    )
+    .map((s) => {
+      const isDamaged = !s.sunk && s.hits && s.hits.length > 0;
+      const cls = s.sunk ? 'sunk' : isDamaged ? 'damaged' : '';
+      const icon = s.sunk ? '💀' : isDamaged ? '🔥' : '🚢';
+      return `<span class="fleet-chip ${cls}">${icon} ${s.name} (${s.size})</span>`;
+    })
     .join('');
 }
 
@@ -1385,7 +1449,6 @@ function spawnFloatingEmoji(emoji) {
 window.addEventListener('DOMContentLoaded', () => {
   initCoordinateHeaders();
 
-  // Listeners globali per Drag & Drop fluido su mobile e PC
   window.addEventListener('pointermove', handleGlobalPointerMove, { passive: false });
   window.addEventListener('pointerup', handleGlobalPointerUp);
   window.addEventListener('pointercancel', handleGlobalPointerUp);
@@ -1419,7 +1482,6 @@ window.addEventListener('DOMContentLoaded', () => {
     enterGameScreen();
   });
 
-  // Controlli Setup Flotta
   document.getElementById('btn-rotate-ship').addEventListener('click', () => {
     if (!app.state || app.state.phase !== 'SETUP') return;
     const me = app.state.players[app.myIndex];
@@ -1442,7 +1504,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-ready-fleet').addEventListener('click', confirmMyFleetReady);
 
-  // Tab Mobile Radar Nemico / La Mia Flotta
   document.getElementById('tab-enemy-radar').addEventListener('click', () => {
     app.mobileActiveTab = 'enemy';
     renderAll();
@@ -1452,11 +1513,9 @@ window.addEventListener('DOMContentLoaded', () => {
     renderAll();
   });
 
-  // Condivisione
   document.getElementById('room-pill').addEventListener('click', shareInviteMobile);
   document.getElementById('btn-banner-share').addEventListener('click', shareInviteMobile);
 
-  // Rivincita
   document.getElementById('btn-rematch').addEventListener('click', () => {
     if (app.mode === 'online' && app.role === 'guest') {
       sendNetMessage('REMATCH');
@@ -1465,7 +1524,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Regole & Audio
   document.getElementById('btn-rules').addEventListener('click', () => {
     document.getElementById('rules-modal').classList.add('open');
   });
