@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#030b17" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Naval Duel" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Battaglia Navale Duel • Mobile Edition</title>
+  <link rel="stylesheet" href="styles.css?v=3" />
+  <!-- PeerJS per multiplayer P2P a distanza tramite codice stanza -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
+</head>
+<body>
+  <!-- Barra Superiore -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-logo">⚓</div>
+      <div class="brand-text-wrap">
+        <span class="brand-title">Battaglia Navale</span>
+        <span class="brand-sub">Mobile Tactical Duel</span>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <div id="room-pill" class="room-pill" style="display: none;" title="Tocca per inviare il link di invito">
+        <span id="conn-dot" class="status-dot"></span>
+        <span id="room-code-header">-----</span>
+        <span>📲</span>
+      </div>
+      <button id="btn-sound" class="icon-btn" title="Attiva/Disattiva audio">🔊</button>
+      <button id="btn-rules" class="icon-btn" title="Regole">📖</button>
+      <button id="btn-leave" class="icon-btn" style="display: none;" title="Esci dalla partita">🚪</button>
+    </div>
+  </header>
+
+  <!-- SCHERMATA LOBBY -->
+  <main id="lobby-screen" class="screen active">
+    <div class="lobby-card">
+      <div class="lobby-hero">
+        <span class="lobby-badge">📱 v3.0 • Mobile Zero-Scroll</span>
+        <h1>Battaglia Navale Duel</h1>
+        <p>Trascina la tua flotta col dito e affonda le 5 navi da guerra avversarie a distanza!</p>
+      </div>
+
+      <div class="input-group">
+        <label for="player-name-input">Nome Comandante</label>
+        <input
+          id="player-name-input"
+          type="text"
+          class="text-input"
+          placeholder="Es. Marco"
+          maxlength="16"
+          value="Comandante 1"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Azioni Stanza Online -->
+      <div class="lobby-tabs">
+        <button id="btn-create-room" class="btn-primary">
+          ✨ Crea Stanza Online
+        </button>
+        <button id="btn-cpu-mode" class="btn-secondary" title="Gioca subito contro il computer">
+          🤖 Contro CPU
+        </button>
+      </div>
+
+      <div class="divider">oppure entra nella stanza del tuo amico</div>
+
+      <!-- Box Entra con Codice -->
+      <div class="join-box">
+        <div class="join-row">
+          <input
+            id="join-code-input"
+            type="text"
+            class="text-input code-input"
+            placeholder="CODICE"
+            maxlength="8"
+            autocomplete="off"
+          />
+          <button id="btn-join-room" class="btn-primary" style="white-space: nowrap;">
+            🚀 Entra
+          </button>
+        </div>
+        <div id="lobby-error" style="color: #fca5a5; font-size: 0.84rem; margin-top: 8px; display: none;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SCHERMATA DI GIOCO (100% Zero-Scroll su Mobile) -->
+  <main id="game-screen" class="screen">
+    <!-- Banner Invito Rapido in Sala (visibile finché l'amico non è entrato) -->
+    <section id="in-game-invite-banner" class="in-game-invite-banner" style="display: none;">
+      <div class="invite-banner-left">
+        <span class="invite-pulse-dot"></span>
+        <span id="banner-wait-msg">Stanza pronta • Invita il tuo amico!</span>
+      </div>
+      <button id="btn-banner-share" class="btn-banner-share">📲 Invita Amico</button>
+    </section>
+
+    <!-- HUD Turno / Stato Partita -->
+    <section id="turn-hud" class="turn-hud">
+      <div class="turn-status-main">
+        <span id="turn-badge" class="turn-indicator-badge">SCHIERAMENTO</span>
+        <span id="turn-prompt" class="turn-prompt">Trascina le navi (tocca una nave per ruotarla)!</span>
+      </div>
+      <span id="streak-pill" class="ships-remaining-badge">🎯 0</span>
+    </section>
+
+    <!-- Selettore Rapido Vista Mobile durante la Battaglia -->
+    <div id="mobile-view-tabs" class="mobile-view-tabs">
+      <button id="tab-enemy-radar" class="view-tab-btn active">
+        🎯 Radar Nemico (Spara)
+      </button>
+      <button id="tab-my-fleet" class="view-tab-btn">
+        🛡️ La Mia Flotta
+      </button>
+    </div>
+
+    <!-- CONTENITORE DELLE DUE GRIGLIE 10x10 (Al centro dello schermo!) -->
+    <section id="boards-container" class="boards-battle-container single-setup-mode">
+      <!-- RADAR NEMICO (Dove spari) -->
+      <div id="card-enemy-radar" class="radar-card" style="display: none;">
+        <div class="radar-header">
+          <div class="radar-title">
+            <span>🎯 Radar Nemico:</span>
+            <strong id="enemy-name-label">Avversario</strong>
+          </div>
+          <span id="enemy-ships-badge" class="ships-remaining-badge">5/5 navi</span>
+        </div>
+
+        <div class="grid-wrapper">
+          <div class="coord-corner"></div>
+          <div id="enemy-cols" class="coord-cols"></div>
+          <div id="enemy-rows" class="coord-rows"></div>
+          <div id="stage-enemy" class="naval-board-stage">
+            <div id="grid-enemy" class="naval-grid-10x10"></div>
+            <div id="ships-layer-enemy" class="ships-overlay-layer"></div>
+            <div id="shots-layer-enemy" class="shots-overlay-layer"></div>
+          </div>
+        </div>
+
+        <div id="enemy-fleet-status" class="fleet-status-strip"></div>
+      </div>
+
+      <!-- LA TUA FLOTTA (Dove trascini le navi e vedi gli attacchi subiti) -->
+      <div id="card-my-fleet" class="radar-card">
+        <div class="radar-header">
+          <div class="radar-title">
+            <span>🛡️ Flotta:</span>
+            <strong id="my-name-label">Comandante 1</strong>
+          </div>
+          <span id="my-ships-badge" class="ships-remaining-badge">✋ Trascina / Tocca=Ruota</span>
+        </div>
+
+        <div class="grid-wrapper">
+          <div class="coord-corner"></div>
+          <div id="my-cols" class="coord-cols"></div>
+          <div id="my-rows" class="coord-rows"></div>
+          <div id="stage-my" class="naval-board-stage">
+            <div id="grid-my" class="naval-grid-10x10"></div>
+            <div id="ships-layer-my" class="ships-overlay-layer"></div>
+            <div id="shots-layer-my" class="shots-overlay-layer"></div>
+          </div>
+        </div>
+
+        <div id="my-fleet-status" class="fleet-status-strip"></div>
+      </div>
+    </section>
+
+    <!-- PANNELLO POSIZIONAMENTO NAVI A PORTATA DI POLLICE IN BASSO (Visibile in SETUP) -->
+    <section id="setup-panel" class="setup-panel">
+      <div id="ship-dock" class="ship-dock"></div>
+      <div class="setup-actions">
+        <button id="btn-rotate-ship" class="btn-secondary">🔄 Ruota</button>
+        <button id="btn-random-fleet" class="btn-secondary">🎲 Casuale</button>
+        <button id="btn-ready-fleet" class="btn-success">✅ Flotta Pronta!</button>
+      </div>
+    </section>
+
+    <!-- Barra Inferiore Reazioni (Visibile in BATTLE) -->
+    <section id="battle-bottom-bar" class="bottom-bar" style="display: none;">
+      <div class="reaction-strip">
+        <button class="emoji-btn" data-emoji="💥">💥</button>
+        <button class="emoji-btn" data-emoji="🌊">🌊</button>
+        <button class="emoji-btn" data-emoji="🎯">🎯</button>
+        <button class="emoji-btn" data-emoji="😱">😱</button>
+        <button class="emoji-btn" data-emoji="😂">😂</button>
+        <button class="emoji-btn" data-emoji="🫡">🫡</button>
+      </div>
+      <span id="status-footer-text" style="font-size: 0.72rem; color: #7dd3fc; font-weight: 700;">
+        💥 Colpito = Spari ancora!
+      </span>
+    </section>
+  </main>
+
+  <!-- MODALE VITTORIA -->
+  <div id="victory-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div style="font-size: 3rem; margin-bottom: 4px;">🏆</div>
+      <h2 id="victory-title">Vittoria Navale!</h2>
+      <p id="victory-subtitle">Tutte le 5 navi nemiche sono state affondate!</p>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div id="stat-shots" class="stat-val">0</div>
+          <div class="stat-lbl">Colpi Sparati</div>
+        </div>
+        <div class="stat-item">
+          <div id="stat-accuracy" class="stat-val">0%</div>
+          <div class="stat-lbl">Precisione</div>
+        </div>
+      </div>
+
+      <button id="btn-rematch" class="btn-primary" style="width: 100%;">🔄 Gioca Rivincita</button>
+    </div>
+  </div>
+
+  <!-- MODALE REGOLE -->
+  <div id="rules-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <h2>📖 Regole Battaglia Navale</h2>
+      <ul class="rules-list">
+        <li><strong>Fase 1 (Schieramento):</strong> Trascina col dito le 5 navi sulla mappa 10×10. Tocca una nave per ruotarla di 90° e premi <strong>"✅ Flotta Pronta!"</strong>.</li>
+        <li><strong>Fase 2 (Battaglia):</strong> A turno tocca una casella sul <strong>Radar Nemico</strong> per lanciare un siluro:
+          <ul>
+            <li>💥 <strong>Colpito / Affondato:</strong> segni il colpo e <strong>continui a sparare!</strong></li>
+            <li>🌊 <strong>Acqua:</strong> il colpo manca e <strong>la mano passa all'avversario</strong> (la vista passa automaticamente sulla tua flotta per farti seguire i colpi nemici!).</li>
+          </ul>
+        </li>
+        <li>🏆 <strong>Obiettivo:</strong> Vince chi affonda per primo tutte le 5 navi dell'avversario!</li>
+      </ul>
+      <button id="btn-close-rules" class="btn-primary" style="width: 100%;">Ricevuto, Comandante!</button>
+    </div>
+  </div>
+
+  <script src="app.js?v=3"></script>
+</body>
+</html>
